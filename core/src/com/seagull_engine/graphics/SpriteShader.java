@@ -1,9 +1,10 @@
 package com.seagull_engine.graphics;
 
 import com.badlogic.gdx.graphics.glutils.ShaderProgram;
+import com.badlogic.gdx.utils.Disposable;
 import com.badlogic.gdx.Gdx;
 
-public class SpriteShader {
+public class SpriteShader implements Disposable {
     private final ShaderProgram shader;
 
     public SpriteShader(ShaderProgram shaderProgram) {
@@ -23,5 +24,10 @@ public class SpriteShader {
 
     public ShaderProgram getShader() {
         return shader;
+    }
+
+    @Override
+    public void dispose() {
+        shader.dispose();
     }
 }

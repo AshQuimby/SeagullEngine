@@ -7,16 +7,19 @@ import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.seagull_engine.graphics.SpriteShader;
 
 public class Seagraphics {
 
     private final SeagullManager window;
     public final ImageLoader imageProvider;
+    public final ShapeRenderer shapeRenderer;
     private static final GlyphLayout fontMeasurement = new GlyphLayout();
 
-    public Seagraphics(SeagullManager window, ImageLoader imageProvider) {
+    public Seagraphics(SeagullManager window, ImageLoader imageProvider, ShapeRenderer shapeRenderer) {
         this.window = window;
         this.imageProvider = imageProvider;
+        this.shapeRenderer = shapeRenderer;
     }
 
     public void basicDraw(Texture image, float x, float y) {
@@ -57,6 +60,28 @@ public class Seagraphics {
     public void usefulTintDraw(Texture image, float x, float y, int width, int height, int frame, int frameCount, float rotation, boolean flippedHorizontal, boolean flippedVertical, Color tint) {
         if (frameCount <= 0) frameCount = 1;
         window.draw(image, x, y, width, height, image.getWidth(), image.getHeight() / frameCount, frame, rotation, flippedHorizontal, flippedVertical, true, tint);
+    }
+
+    public void usefulShaderDraw(Texture image, float x, float y, int width, int height, int frame, int frameCount, float rotation, boolean flippedHorizontal, boolean flippedVertical, SpriteShader shader) {
+        if (frameCount <= 0) frameCount = 1;
+        window.getBatch().setShader(shader.getShader());
+        window.draw(image, x, y, width, height, image.getWidth(), image.getHeight() / frameCount, frame, rotation, flippedHorizontal, flippedVertical, true, SeagullManager.baseTint);
+        window.getBatch().setShader(null);
+    }
+
+    public void usefulShaderDraw(Texture image, float x, float y, int width, int height, int frame, int frameCount, float rotation, boolean flippedHorizontal, boolean flippedVertical, SpriteShader shader, Color tint) {
+        if (frameCount <= 0) frameCount = 1;
+        window.getBatch().setShader(shader.getShader());
+        window.draw(image, x, y, width, height, image.getWidth(), image.getHeight() / frameCount, frame, rotation, flippedHorizontal, flippedVertical, true, tint);
+        window.getBatch().setShader(null);
+    }
+
+    public void setShader(SpriteShader shader) {
+        window.getBatch().setShader(shader.getShader());
+    }
+
+    public void resetShader() {
+        window.getBatch().setShader(null);
     }
 
 	public void draw(Texture image, float x, float y, float width, float height, int frameWidth, int frameHeight, int frame, float rotation, boolean flippedHorizontal, boolean flippedVertical, boolean verticalSheet) {
