@@ -1,12 +1,15 @@
 package com.seagull_engine;
 
+import com.badlogic.gdx.graphics.Camera;
 import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.Batch;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
+import com.seagull_engine.graphics.SeagullCamera;
 import com.seagull_engine.graphics.SpriteShader;
 
 public class Seagraphics {
@@ -20,6 +23,26 @@ public class Seagraphics {
         this.window = window;
         this.imageProvider = imageProvider;
         this.shapeRenderer = shapeRenderer;
+    }
+
+    // Sets the current camera to the unmoving camera
+    public void useStaticCamera() {
+        window.batch.setProjectionMatrix(window.staticCamera.combined);
+        shapeRenderer.setProjectionMatrix(window.staticCamera.combined);
+    }
+
+    // Sets the current camera to the dynamic camera
+    public void useDynamicCamera() {
+        window.batch.setProjectionMatrix(window.camera.combined);
+        shapeRenderer.setProjectionMatrix(window.camera.combined);
+    }
+
+    public Camera getStaticCamera() {
+        return window.staticCamera;
+    }
+
+    public SeagullCamera getDynamicCamera() {
+        return window.camera;
     }
 
     public void basicDraw(Texture image, float x, float y) {
@@ -93,12 +116,13 @@ public class Seagraphics {
 	}
 
     public Rectangle drawText(String text, BitmapFont font, float x, float y, float size, Color color, int anchor) {
-        font.getData().setScale(size, size);
+        Rectangle bounds = getTextBounds(text, font, x, y, size, anchor);
+        font.draw(window.batch, text, bounds.x, bounds.y);
+        return bounds;
+    }
 
-        if (text.contains("\n")) {
-            fontMeasurement.setText(font, text.substring(0, 1));
-            return drawStringArray(text.split("\n"), font, x, y, size, color, anchor, fontMeasurement.height + 4)[0];
-        }
+    public Rectangle getTextBounds(String text, BitmapFont font, float x, float y, float size, int anchor) {
+        font.getData().setScale(size, size);
 
         fontMeasurement.setText(font, text);
         Rectangle bounds = new Rectangle(x, y, fontMeasurement.width, fontMeasurement.height);
@@ -109,7 +133,6 @@ public class Seagraphics {
         } else if (anchor == -1) {
             bounds.x += bounds.width / 2;
         }
-        font.draw(window.batch, text, bounds.x, bounds.y);
         return bounds;
     }
 

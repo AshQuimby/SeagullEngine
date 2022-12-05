@@ -18,14 +18,16 @@ import com.badlogic.gdx.graphics.glutils.FrameBuffer;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.ScreenUtils;
+import com.seagull_engine.graphics.SeagullCamera;
 import com.seagull_engine.graphics.SpriteShader;
 import com.seagull_engine.input.MouseInfo;
 
 
 public class SeagullManager extends ApplicationAdapter implements InputProcessor {
 	public SpriteBatch batch;
-	public final Seagraphics graphics;
-	public Camera camera;
+	private Seagraphics graphics;
+	public SeagullCamera camera;
+	protected Camera staticCamera;
 	public final SeagullSounds soundEngine;
 	public final ImageLoader imageProvider;
 	public final MouseInfo cursor;
@@ -49,7 +51,6 @@ public class SeagullManager extends ApplicationAdapter implements InputProcessor
 		screenDimensions = new Vector2(resolutionX, resolutionY);
 		soundEngine = new SeagullSounds(this, false);
 		imageProvider = new ImageLoader(false);
-		graphics = new Seagraphics(this, imageProvider, shapeRenderer);
 		cursor = new MouseInfo(this);
 		messenger = new Messenger();
 		messenger.window = this;
@@ -62,7 +63,6 @@ public class SeagullManager extends ApplicationAdapter implements InputProcessor
 		this.assetsPath = assetsPath;
 		soundEngine = new SeagullSounds(this, false);
 		imageProvider = new ImageLoader(false);
-		graphics = new Seagraphics(this, imageProvider, shapeRenderer);
 		cursor = new MouseInfo(this);
 		this.messenger = messenger;
 		messenger.window = this;
@@ -82,21 +82,21 @@ public class SeagullManager extends ApplicationAdapter implements InputProcessor
 			imageProvider.loadFolder(assetsPath);
 			imageProvider.loadFonts(assetsPath);
 		}
-		camera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		camera = new SeagullCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+		staticCamera = new OrthographicCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
 
 		tick = 0;
 		time = 0;
 		
 		batch = new SpriteBatch();
-		messenger.window = this;
-		messenger.load();
 		Gdx.input.setInputProcessor(this);
 		shapeRenderer = new ShapeRenderer();
         shapeRenderer.setAutoShapeType(true);
+		graphics = new Seagraphics(this, imageProvider, shapeRenderer);
+		messenger.window = this;
+		messenger.load();
 
 		defaultFrameBuffer = new FrameBuffer(Format.RGBA8888, resolutionX, resolutionY, false);
-		addPostProcessingEffect(new SpriteShader("test.fsh"));
-		addPostProcessingEffect(new SpriteShader("curved.fsh"));
 	}
 
 	@Override
@@ -109,55 +109,56 @@ public class SeagullManager extends ApplicationAdapter implements InputProcessor
 
 		ScreenUtils.clear(0, 0, 0, 1); // Clear screen
 
-		defaultFrameBuffer.begin();
+		messenger.update();
+		
+		// defaultFrameBuffer.begin();
 		batch.begin();
 		shapeRenderer.begin();
-		Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
-		batch.setShader(null);
+		// Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT);
+		// batch.setShader(null);
 
-		messenger.update();
 		messenger.render(graphics);
-		graphics.scalableDraw(imageProvider.getImage("colortest.png"), -234 / 2, -199 / 2, 234, 199);
+		// graphics.scalableDraw(imageProvider.getImage("colortest.png"), -234 / 2, -199 / 2, 234, 199);
 
 		batch.end();
 		shapeRenderer.end();
-		defaultFrameBuffer.end();
+		// defaultFrameBuffer.end();
 
-		FrameBuffer lastBuffer = defaultFrameBuffer;
+		// FrameBuffer lastBuffer = defaultFrameBuffer;
 
-		for (int i = 0; i < postProcessingStack.size(); i++) {
-			SpriteShader shader = postProcessingStack.get(i);
-			FrameBuffer renderTarget = frameBuffers.get(i);
+		// for (int i = 0; i < postProcessingStack.size(); i++) {
+		// 	SpriteShader shader = postProcessingStack.get(i);
+		// 	FrameBuffer renderTarget = frameBuffers.get(i);
 
-			renderTarget.begin();
-			batch.begin();
+		// 	renderTarget.begin();
+		// 	batch.begin();
 
-			batch.setShader(shader.getShader());
-			if (batch.getShader().hasUniform("u_time")) {
-				batch.getShader().setUniformf("u_time", time);
-			}
+		// 	batch.setShader(shader.getShader());
+		// 	if (batch.getShader().hasUniform("u_time")) {
+		// 		batch.getShader().setUniformf("u_time", time);
+		// 	}
 
-			Texture fboTexture = lastBuffer.getColorBufferTexture();
-			TextureRegion fboTextureFlipped = new TextureRegion(fboTexture);
-			fboTextureFlipped.flip(false, true);
+		// 	Texture fboTexture = lastBuffer.getColorBufferTexture();
+		// 	TextureRegion fboTextureFlipped = new TextureRegion(fboTexture);
+		// 	fboTextureFlipped.flip(false, true);
 
-			batch.draw(fboTextureFlipped, -resolutionX / 2, -resolutionY / 2);
+		// 	batch.draw(fboTextureFlipped, -resolutionX / 2, -resolutionY / 2);
 
-			batch.end();
-			renderTarget.end();
+		// 	batch.end();
+		// 	renderTarget.end();
 
-			lastBuffer = renderTarget;
-		}
+		// 	lastBuffer = renderTarget;
+		// }
 
-		batch.begin();
-		batch.setShader(null);
+		// batch.begin();
+		// batch.setShader(null);
 
-		Texture fboTexture = lastBuffer.getColorBufferTexture();
-		TextureRegion fboTextureFlipped = new TextureRegion(fboTexture);
-		fboTextureFlipped.flip(false, true);
+		// Texture fboTexture = lastBuffer.getColorBufferTexture();
+		// TextureRegion fboTextureFlipped = new TextureRegion(fboTexture);
+		// fboTextureFlipped.flip(false, true);
 
-		batch.draw(fboTextureFlipped, -resolutionX / 2, -resolutionY / 2);
-		batch.end();
+		// batch.draw(fboTextureFlipped, -resolutionX / 2, -resolutionY / 2);
+		// batch.end();
 
 		tick++;
 		time += Gdx.graphics.getDeltaTime();
@@ -202,11 +203,17 @@ public class SeagullManager extends ApplicationAdapter implements InputProcessor
 
 	public void draw(Texture image, float x, float y, float width, float height, int frameWidth, int frameHeight,
 			int frame, float rotation, boolean flippedHorizontal, boolean flippedVertical, boolean verticalSheet, Color tint) {
-		batch.setColor(tint);
-		batch.draw(image, x, y, width / 2f, height / 2f, width, height, 1, 1, rotation,
-				frameWidth * frame * (verticalSheet ? 0 : 1), frameHeight * frame, frameWidth, frameHeight,
-				flippedHorizontal, flippedVertical);
-		batch.setColor(1, 1, 1, 1);	
+		if (image != null) {
+			batch.setColor(tint);
+			batch.draw(image, x, y, width / 2f, height / 2f, width, height, 1, 1, rotation,
+					frameWidth * frame * (verticalSheet ? 0 : 1), frameHeight * frame, frameWidth, frameHeight,
+					flippedHorizontal, flippedVertical);
+			batch.setColor(1, 1, 1, 1);
+		} else {
+			batch.draw(imageProvider.getImage("null_image.png"), x, y, width / 2f, height / 2f, width, height, 1, 1, rotation,
+					0, 0, frameWidth, frameHeight,
+					false, false);
+		}
 	}
 
 	@Override

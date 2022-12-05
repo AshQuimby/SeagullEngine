@@ -45,10 +45,10 @@ public class GameObject {
     public void lateUpdate() {
     }
 
-    public boolean collideWith(GameObject other) {
-        return CollisionResolver.resolve(hitbox, velocity, other.hitbox);
+    public Vector2 getCenter() {
+        return hitbox.getCenter(new Vector2());
     }
-
+    
     public boolean resize(float width, float height) {
         if (width > 0 && height > 0) {
             Rectangle oldRect = new Rectangle(hitbox.x, hitbox.y, hitbox.width, hitbox.height);
